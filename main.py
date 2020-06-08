@@ -1,93 +1,83 @@
+import math
+import random as rand
 from Player import Player
-from constants import pygame, DISPLAY_WIDTH, DISPLAY_HEIGHT
+from Blob import Blob
+from utils import process_input
+from constants import pg, DISPLAY_WIDTH, DISPLAY_HEIGHT, ENV
 
 
-DISPLAY = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
-pygame.display.set_caption('AgarPy')
-BACKGROUND = pygame.Surface((DISPLAY_WIDTH, DISPLAY_HEIGHT))
-BACKGROUND.fill((33, 33, 33))
-DISPLAY.blit(BACKGROUND, (0, 0))
-
-CLOCK = pygame.time.Clock()
-
-def create_text(text, x_pos, y_pos, color, size):
-    font_obj = pygame.font.Font('freesansbold.ttf', size)
-    textsurface = font_obj.render(text, True, color, (33, 33, 33, 0))
-    textsurface.set_colorkey((33, 33, 33))
-    text_rect_obj = textsurface.get_rect()
-    text_rect_obj.center = (x_pos, y_pos)
-    return textsurface, text_rect_obj
-
-def erase_dirty(surf, spr_rect):
-    surf.blit(BACKGROUND, spr_rect, spr_rect)
-
-class FPSUtil(pygame.sprite.Sprite):
-
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = self.rect = None
-        self.update(0)
-
-    def update(self, alpha):
-            self.image, self.rect = create_text(str(int(CLOCK.get_fps())),
-                                                DISPLAY_WIDTH - 20,
-                                                20, (0, 200, 0),
-                                                DISPLAY_HEIGHT // 40)
+def is_collided(obj1, obj2):
+    obj1_x = obj1.rect.center[0]
+    obj1_y = obj1.rect.center[1]
+    obj2_x = obj2.rect.center[0]
+    obj2_y = obj2.rect.center[1]
+    return math.sqrt((obj1_x - obj2_x) ** 2  + (obj1_y - obj2_y) ** 2) <= obj1.radius
 
 
-PLAYER = Player(DISPLAY_WIDTH // 2, 800, (30, 101, 150))
-ALL_SPRITES = pygame.sprite.Group()
-ALL_SPRITES.add(PLAYER)
-ALL_SPRITES.add(FPSUtil())
+def player_blobs_collide(player, blobs):
+    return [blob for blob in blobs if is_collided(player, blob)]
 
 
-RUNNING = True
-DELTA_T = 10
+def draw_sprites(sprites):
+    for sprite in sprites:
+        sprite.draw(DISPLAY)
+
+
+pg.display.set_caption('AgarPy')
+DISPLAY = pg.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
+BACKGROUND = pg.Surface((DISPLAY_WIDTH, DISPLAY_HEIGHT))
+BACKGROUND.fill((0, 0, 0))
+CLOCK = pg.time.Clock()
+
+DELTA_T = 30
 MAX_FRAME_TIME = 250
-ACC = 0
-controls = [0] * 4
-while RUNNING:
+running = True
+acc = 0
+fps_timer = 0
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            RUNNING = False
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                RUNNING = False
-            if event.key == pygame.K_a or event.key == pygame.K_LEFT:
-                controls[0] = -1
-            elif event.key == pygame.K_d or event.key == pygame.K_RIGHT:
-                controls[1] = 1
-            elif event.key == pygame.K_w or event.key == pygame.K_UP:
-                controls[2] = -1
-            elif event.key == pygame.K_s or event.key == pygame.K_DOWN:
-                controls[3] = 1
-        elif event.type == pygame.KEYUP:
-            if event.key == pygame.K_a or event.key == pygame.K_LEFT:
-                controls[0] = 0
-            elif event.key == pygame.K_d or event.key == pygame.K_RIGHT:
-                controls[1] = 0
-            elif event.key == pygame.K_w or event.key == pygame.K_UP:
-                controls[2] = 0
-            elif event.key == pygame.K_s or event.key == pygame.K_DOWN:
-                controls[3] = 0
+# world setup
+players = []
+players.append(Player(DISPLAY_WIDTH // 2, 400, (82, 0, 176), "bob"))
 
-    if not controls[0] & controls[1]:
-        PLAYER.x_velocity = controls[0] or controls[1]
-    if not controls[2] & controls[3]:
-        PLAYER.y_velocity = controls[2] or controls[3]
+point_blobs = []
+for i in range(150):
+    rand_x = rand.randrange(10, DISPLAY_WIDTH)
+    rand_y = rand.randrange(10, DISPLAY_HEIGHT)
+    point_blobs.append(Blob(rand_x, rand_y))
 
-    temp = CLOCK.tick()
-    if temp > MAX_FRAME_TIME:
+# initial draw
+DISPLAY.blit(BACKGROUND, (0, 0))
+draw_sprites(players)
+draw_sprites(point_blobs)
+
+while running:
+    running = process_input(players[0])
+
+    delta_time = CLOCK.tick()
+    if delta_time > MAX_FRAME_TIME:
         print("ERROR")
-    ACC += min(temp, MAX_FRAME_TIME)
-    while ACC >= DELTA_T:
-        ALL_SPRITES.update(-1)
-        ACC -= DELTA_T
-    ALL_SPRITES.update(float(ACC) / DELTA_T)
+    acc += min(delta_time, MAX_FRAME_TIME)
+    while acc >= DELTA_T:
+        if ENV == 'dev':
+            fps_timer += 1
+            # update every half second
+            if fps_timer == 15:
+                pg.display.set_caption(str(CLOCK.get_fps()))
+                fps_timer = 0
+        for player in players:
+            player.update()
+        acc -= DELTA_T
+    for player in players:
+        player.interpolate(float(acc) / DELTA_T)
 
-    ALL_SPRITES.clear(DISPLAY, erase_dirty)
-    ALL_SPRITES.draw(DISPLAY)
-    pygame.display.flip()
+    for player in players:
+        for blob in player_blobs_collide(player, point_blobs):
+            player.increase_size(blob.points)
+            point_blobs.remove(blob)
 
-pygame.quit()
+    DISPLAY.blit(BACKGROUND, (0, 0))
+    draw_sprites(players)
+    draw_sprites(point_blobs)
+    pg.display.update()
+
+pg.quit()
