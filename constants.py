@@ -1,8 +1,8 @@
 import contextlib
 with contextlib.redirect_stdout(None):
-    import pygame
-pygame.init()
+    import pygame as pg
+pg.init()
 
-DISPLAY_WIDTH = 900
-DISPLAY_HEIGHT = 900
-COLORKEY = (255, 0, 255)
+DISPLAY_WIDTH = 1280
+DISPLAY_HEIGHT = 960
+ENV = 'dev'
