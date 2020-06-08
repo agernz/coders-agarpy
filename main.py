@@ -1,7 +1,7 @@
 import math
 import random as rand
-from Player import Player
-from Blob import Blob
+from player import Player
+from blob import Blob
 from utils import process_input
 from constants import pg, DISPLAY_WIDTH, DISPLAY_HEIGHT, ENV
 
