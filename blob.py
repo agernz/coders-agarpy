@@ -10,7 +10,8 @@ BLOB_TIERS = {
 
 class Blob():
 
-    def __init__(self, init_x, init_y):
+    def __init__(self, init_x, init_y, id):
+        self.id = id + 1
         self.rect = None
         self.pos = (init_x, init_y)
         self.tier = rand.randrange(100)
@@ -21,6 +22,12 @@ class Blob():
         else:
             self.color, self.points, self.radius = BLOB_TIERS[3]
 
+    def get_id(self):
+        return self.id
+
+    def get_pos(self):
+        return self.pos
+
     def draw(self, target_surface):
         self.rect = pg.draw.circle(target_surface, self.color, \
-            self.pos, self.radius)
+                                   self.pos, self.radius)

@@ -19,7 +19,7 @@ BACKGROUND.fill((0, 0, 0))
 CLOCK = pg.time.Clock()
 
 DELTA_T = 30
-MAX_FRAME_TIME = 250
+MAX_FRAME_TIME = 20000
 running = True
 acc = 0
 fps_timer = 0
@@ -33,7 +33,9 @@ while running:
 
     delta_time = CLOCK.tick()
     if delta_time > MAX_FRAME_TIME:
-        print("ERROR")
+        print("ERROR - delta_ time greater than max_frame", delta_time)
+    # print(delta_time)
+
     acc += min(delta_time, MAX_FRAME_TIME)
     while acc >= DELTA_T:
         if ENV == 'dev':
