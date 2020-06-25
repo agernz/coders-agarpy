@@ -18,8 +18,9 @@ def registerPlayer(name, f):
     response = requests.request("POST", url, headers=headers, data=payload)
     print(response.text.encode('utf8'))
 
-
+########  Type the name of your blob here ###########
 player_name = "bob"
+####################################################
 
 function = getDecisionFunction(Player)[1]
 registerPlayer(player_name, function)
