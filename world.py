@@ -4,6 +4,7 @@ from blob import Blob
 from player import Player
 from constants import DISPLAY_WIDTH, DISPLAY_HEIGHT, ENV
 from utils import two_point_distance
+from playerloader import get_blobs
 from random import randrange
 
 
@@ -18,13 +19,17 @@ class World():
 
     def __init__(self):
         self.players = []
-        self.players.append(Player(rand.randrange(DISPLAY_WIDTH), rand.randrange(DISPLAY_HEIGHT), (255, 0, 0), "bob1"))
-        self.players.append(Player(rand.randrange(DISPLAY_WIDTH), rand.randrange(DISPLAY_HEIGHT), (0, 0, 255), "bob2"))
+        player_blobs = get_blobs()
+        for player in player_blobs:
+            self.players.append(Player(rand.randrange(DISPLAY_WIDTH),
+                                       rand.randrange(DISPLAY_HEIGHT),
+                                       (255, 0, 0),
+                                       player,
+                                       player_blobs[player]))
+        self.players.append(Player(rand.randrange(DISPLAY_WIDTH), rand.randrange(DISPLAY_HEIGHT), (0, 0, 255), "bob3"))
         self.players.append(Player(rand.randrange(DISPLAY_WIDTH), rand.randrange(DISPLAY_HEIGHT), (82, 0, 176), "bob4"))
-        self.players.append(Player(rand.randrange(DISPLAY_WIDTH), rand.randrange(DISPLAY_HEIGHT), (82, 0, 123), "bob5"))
-        self.players.append(Player(rand.randrange(DISPLAY_WIDTH), rand.randrange(DISPLAY_HEIGHT), (255, 0, 0), "bob6"))
-        self.players.append(Player(rand.randrange(DISPLAY_WIDTH), rand.randrange(DISPLAY_HEIGHT), (0, 0, 255), "bo7"))
-        self.players.append(Player(rand.randrange(DISPLAY_WIDTH), rand.randrange(DISPLAY_HEIGHT), (82, 0, 176), "bob8"))
+        self.players.append(Player(rand.randrange(DISPLAY_WIDTH), rand.randrange(DISPLAY_HEIGHT), (0, 0, 255), "bob5"))
+        self.players.append(Player(rand.randrange(DISPLAY_WIDTH), rand.randrange(DISPLAY_HEIGHT), (82, 0, 176), "bob6"))
         self.blobs = []
         self.add_blobs(50)
 

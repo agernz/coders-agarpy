@@ -55,7 +55,7 @@ class Player():
     def get_name(self):
         return self.name
 
-    def __init__(self, init_x, init_y, color, name):
+    def __init__(self, init_x, init_y, color, name, decision=None):
         self.name = name
         self.cur_state = (init_x, init_y)
         self.prev_state = self.cur_state
@@ -67,8 +67,12 @@ class Player():
         self.velocity = self.speed
         self.image = None
         self.rect = None
+        self.isBot = True
         font = pg.font.SysFont('chalkduster.ttf', 20)
         self.name_text = font.render(name, True, (255, 255, 255))
+        if decision is not None:
+            self.make_decision = decision
+            self.isBot = False
 
     def increase_size(self, delta):
         self.radius += delta
@@ -96,7 +100,10 @@ class Player():
 
     def update(self, world):
         self.prev_state = self.cur_state
-        self.x_dir, self.y_dir = self.make_decision(world)
+        if not self.isBot:
+            self.x_dir, self.y_dir = self.make_decision(self, world)
+        else:
+            self.x_dir, self.y_dir = self.make_decision(world)
 
         font = pg.font.SysFont('chalkduster.ttf', 20)
         self.name_text = font.render(self.name + ":" + str(self.radius), True, (255, 255, 255))
