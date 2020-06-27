@@ -61,8 +61,8 @@ class World():
                 distance = two_point_distance(player_a.get_state(), position)
                 self.player_to_blob_distances[name_a].append((blob.get_id(), position, distance))
 
-    def get_other_players(self, player):
-        return sorted(list(self.player_distances[player.name]), key=lambda p: p[2])
+    def get_other_players(self, player_name):
+        return sorted(list(self.player_distances[player_name]), key=lambda p: p[2])
 
     def get_blobs(self, player):
         return sorted(list(self.player_to_blob_distances[player.name]), key=lambda p: p[1])
@@ -112,12 +112,18 @@ class World():
                 if self.is_collided(player, player2):
                     if player.radius > player2.radius:
                         player.increase_size(player2.radius / 5)
-                        player2.cur_state = rand.randrange(DISPLAY_WIDTH), rand.randrange(DISPLAY_HEIGHT)
+                        player2.cur_state = rand.randrange(DISPLAY_WIDTH), \
+                            rand.randrange(DISPLAY_HEIGHT)
                         player2.radius = 10
                     elif player2.radius < player.radius:
                         player2.increase_size(player.radius / 5)
-                        player.cur_state = rand.randrange(DISPLAY_WIDTH), rand.randrange(DISPLAY_HEIGHT)
+                        player.cur_state = rand.randrange(DISPLAY_WIDTH), \
+                            rand.randrange(DISPLAY_HEIGHT)
                         player.radius = 10
+
+    def get_top_players(self):
+        top_players = sorted(self.players, key=lambda player: player.radius, reverse=True)[:3]
+        return (top_player.name for top_player in top_players)
 
     def draw(self, draw_sprites):
         draw_sprites(self.players)
