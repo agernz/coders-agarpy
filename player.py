@@ -3,14 +3,28 @@ import time
 from random import randrange
 from math import sqrt
 
-N = [0, 1]
-S = [0, -1]
-E = [1, 0]
-W = [-1, 0]
-
 
 class Player():
     dec_counter = 0
+
+    def __init__(self, init_x, init_y, color, name, decision=None):
+        self.name = name
+        self.cur_state = (init_x, init_y)
+        self.prev_state = self.cur_state
+        self.color = color
+        self.radius = 10
+        self.x_dir = 0
+        self.y_dir = 0
+        self.speed = 5
+        self.velocity = self.speed
+        self.image = None
+        self.rect = None
+        self.isBot = True
+        font = pg.font.SysFont('chalkduster.ttf', 20)
+        self.name_text = font.render(name, True, (255, 255, 255))
+        if decision is not None:
+            self.make_decision = decision
+            self.isBot = False
 
     def get_player_distance(self, other_player):
         return other_player[2]
@@ -34,7 +48,7 @@ class Player():
 
     def make_decision(self, world):
         direction = [0, 0]
-        players = world.get_other_players(self)
+        players = world.get_other_players(self.name)
         closest = players[0]
         distance = self.get_player_distance(closest)
         if distance < 100:
@@ -55,24 +69,6 @@ class Player():
     def get_name(self):
         return self.name
 
-    def __init__(self, init_x, init_y, color, name, decision=None):
-        self.name = name
-        self.cur_state = (init_x, init_y)
-        self.prev_state = self.cur_state
-        self.color = color
-        self.radius = 10
-        self.x_dir = 0
-        self.y_dir = 0
-        self.speed = 5
-        self.velocity = self.speed
-        self.image = None
-        self.rect = None
-        self.isBot = True
-        font = pg.font.SysFont('chalkduster.ttf', 20)
-        self.name_text = font.render(name, True, (255, 255, 255))
-        if decision is not None:
-            self.make_decision = decision
-            self.isBot = False
 
     def increase_size(self, delta):
         self.radius += delta
