@@ -113,11 +113,14 @@ class Player():
         self.rect.center = self.cur_state
 
     def draw(self, target_surface):
+        cur_state_int = tuple([int(x) for x in self.cur_state])
+        radius_int = int(self.radius)
         self.rect = pg.draw.circle(target_surface, self.color, \
-                                   self.cur_state, self.radius)
+                                   cur_state_int, radius_int)
+
         # draw a circle to represent the line of sight of the blob
         self.rect = pg.draw.circle(target_surface, (255, 255, 255), \
-                                   self.cur_state, self.radius + 100, width=1)
+                                   cur_state_int, radius_int + 100, 1)
         text_pos = (
             self.cur_state[0] - self.name_text.get_width() / 2,
             self.cur_state[1] - self.name_text.get_height() / 2
