@@ -1,7 +1,8 @@
-from constants import pg, DISPLAY_WIDTH, DISPLAY_HEIGHT
 import time
 from random import randrange
 from math import sqrt
+from constants import pg, DISPLAY_WIDTH, DISPLAY_HEIGHT, TEXT_COLOR
+from pygame import gfxdraw
 
 
 class Player():
@@ -18,13 +19,18 @@ class Player():
         self.speed = 5
         self.velocity = self.speed
         self.image = None
-        self.rect = None
         self.isBot = True
         font = pg.font.SysFont('chalkduster.ttf', 20)
-        self.name_text = font.render(name, True, (255, 255, 255))
+        self.name_text = font.render(name, True, TEXT_COLOR)
+        self.rect = None
+        self.update_rect()
         if decision is not None:
             self.make_decision = decision
             self.isBot = False
+
+    def update_rect(self):
+        self.rect = pg.Rect(self.cur_state[0] - self.radius, self.cur_state[1] - self.radius, \
+                                self.radius * 2, self.radius * 2)
 
     def get_player_distance(self, other_player):
         return other_player[2]
@@ -72,6 +78,7 @@ class Player():
 
     def increase_size(self, delta):
         self.radius += delta
+        self.update_rect()
         self.velocity = round(self.speed - self.radius / 75.)
 
     def move(self, direction):
@@ -102,7 +109,7 @@ class Player():
             self.x_dir, self.y_dir = self.make_decision(world)
 
         font = pg.font.SysFont('chalkduster.ttf', 20)
-        self.name_text = font.render(self.name + ":" + str(self.radius), True, (255, 255, 255))
+        self.name_text = font.render(self.name, True, TEXT_COLOR)
 
         self.cur_state = (self.cur_state[0] + self.x_dir * self.velocity, \
                           self.cur_state[1] + self.y_dir * self.velocity)
@@ -113,14 +120,13 @@ class Player():
         self.rect.center = self.cur_state
 
     def draw(self, target_surface):
-        cur_state_int = tuple([int(x) for x in self.cur_state])
-        radius_int = int(self.radius)
-        self.rect = pg.draw.circle(target_surface, self.color, \
-                                   cur_state_int, radius_int)
+        pos = tuple([int(x) for x in self.cur_state])
+        radius = int(self.radius)
+        gfxdraw.filled_circle(target_surface, pos[0], pos[1], radius, self.color)
+        gfxdraw.aacircle(target_surface, pos[0], pos[1], radius, self.color)
 
         # draw a circle to represent the line of sight of the blob
-        self.rect = pg.draw.circle(target_surface, (255, 255, 255), \
-                                   cur_state_int, radius_int + 100, 1)
+        pg.draw.circle(target_surface, (255, 255, 255), pos, radius + 100, 1)
         text_pos = (
             self.cur_state[0] - self.name_text.get_width() / 2,
             self.cur_state[1] - self.name_text.get_height() / 2
