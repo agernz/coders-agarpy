@@ -5,7 +5,7 @@ from player import Player
 from blob import Blob
 from world import World
 from utils import process_input
-from constants import pg, DISPLAY_WIDTH, DISPLAY_HEIGHT, ENV
+from constants import pg, DISPLAY_WIDTH, DISPLAY_HEIGHT, ENV, BACKGROUND_COLOR, TEXT_COLOR
 
 
 def draw_sprites(sprites):
@@ -16,7 +16,7 @@ def draw_sprites(sprites):
 pg.display.set_caption('AgarPy')
 DISPLAY = pg.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
 BACKGROUND = pg.Surface((DISPLAY_WIDTH, DISPLAY_HEIGHT))
-BACKGROUND.fill((0, 0, 0))
+BACKGROUND.fill(BACKGROUND_COLOR)
 CLOCK = pg.time.Clock()
 
 DELTA_T = 60
@@ -61,9 +61,9 @@ while running:
 top_players = world.get_top_players()
 first_font = pg.font.SysFont('chalkduster.ttf', 150)
 contenders_font = pg.font.SysFont('chalkduster.ttf', 50)
-first_text = first_font.render("{} Wins!".format(next(top_players)), True, (255, 255, 255))
-second_text = contenders_font.render("2nd Place: {}".format(next(top_players)), True, (255, 255, 255))
-third_text = contenders_font.render("3rd Place: {}".format(next(top_players)), True, (255, 255, 255))
+first_text = first_font.render("{} Wins!".format(next(top_players)), True, TEXT_COLOR)
+second_text = contenders_font.render("2nd Place: {}".format(next(top_players)), True, TEXT_COLOR)
+third_text = contenders_font.render("3rd Place: {}".format(next(top_players)), True, TEXT_COLOR)
 text_y = DISPLAY_HEIGHT / 2 - first_text.get_height()
 DISPLAY.blit(first_text, (DISPLAY_WIDTH / 2 - first_text.get_width() / 2, text_y))
 DISPLAY.blit(second_text, (DISPLAY_WIDTH / 2 - second_text.get_width() / 2, text_y + 200))
