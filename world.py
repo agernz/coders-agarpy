@@ -6,6 +6,7 @@ from constants import DISPLAY_WIDTH, DISPLAY_HEIGHT, ENV
 from utils import two_point_distance
 from playerloader import get_blobs
 from random import randrange
+from constants import PLAYER_COLORS
 
 
 # def random_dec(*paras):
@@ -19,17 +20,18 @@ class World():
 
     def __init__(self):
         self.players = []
-        player_blobs = get_blobs()
-        for player in player_blobs:
-            self.players.append(Player(rand.randrange(DISPLAY_WIDTH),
-                                       rand.randrange(DISPLAY_HEIGHT),
-                                       (255, 0, 0),
-                                       player,
-                                       player_blobs[player]))
-        self.players.append(Player(rand.randrange(DISPLAY_WIDTH), rand.randrange(DISPLAY_HEIGHT), (0, 0, 255), "bob3"))
-        self.players.append(Player(rand.randrange(DISPLAY_WIDTH), rand.randrange(DISPLAY_HEIGHT), (82, 0, 176), "bob4"))
-        self.players.append(Player(rand.randrange(DISPLAY_WIDTH), rand.randrange(DISPLAY_HEIGHT), (0, 0, 255), "bob5"))
-        self.players.append(Player(rand.randrange(DISPLAY_WIDTH), rand.randrange(DISPLAY_HEIGHT), (82, 0, 176), "bob6"))
+        # player_blobs = get_blobs()
+        # for player in player_blobs:
+        #     self.players.append(Player(rand.randrange(DISPLAY_WIDTH),
+        #                                rand.randrange(DISPLAY_HEIGHT),
+        #                                (255, 0, 0),
+        #                                player,
+        #                                player_blobs[player]))
+        colors = list(PLAYER_COLORS.values())
+        self.players.append(Player(rand.randrange(DISPLAY_WIDTH), rand.randrange(DISPLAY_HEIGHT), rand.choice(colors), "Adam"))
+        self.players.append(Player(rand.randrange(DISPLAY_WIDTH), rand.randrange(DISPLAY_HEIGHT), rand.choice(colors), "Pablo"))
+        self.players.append(Player(rand.randrange(DISPLAY_WIDTH), rand.randrange(DISPLAY_HEIGHT), rand.choice(colors), "Gary"))
+        self.players.append(Player(rand.randrange(DISPLAY_WIDTH), rand.randrange(DISPLAY_HEIGHT), rand.choice(colors), "David"))
         self.blobs = []
         self.add_blobs(50)
 
@@ -54,12 +56,10 @@ class World():
         for player_a in self.players:
             for blob in self.blobs:
                 name_a = player_a.get_name()
-                blob_id = str(blob.get_id())
                 if name_a not in self.player_to_blob_distances:
                     self.player_to_blob_distances[name_a] = []
-                position = blob.get_pos()
-                distance = two_point_distance(player_a.get_state(), position)
-                self.player_to_blob_distances[name_a].append((blob.get_id(), position, distance))
+                distance = two_point_distance(player_a.get_state(), blob.pos)
+                self.player_to_blob_distances[name_a].append((blob.id, blob.pos, distance))
 
     def get_other_players(self, player_name):
         return sorted(list(self.player_distances[player_name]), key=lambda p: p[2])
