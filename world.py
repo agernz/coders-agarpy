@@ -47,7 +47,8 @@ class World():
                     distance = two_point_distance(player_a.cur_state, player_b.cur_state)
                     if name_a not in self.player_distances:
                         self.player_distances[name_a] = []
-                    self.player_distances[name_a].append((player_b.name, player_b.cur_state, distance, player_b.radius))
+                    self.player_distances[name_a].append((
+                        player_b.name, player_b.cur_state, distance, player_b.radius))
 
     def calculate_player_blob_distances(self):
         for player_a in self.players:
@@ -56,7 +57,8 @@ class World():
                 if name_a not in self.player_to_blob_distances:
                     self.player_to_blob_distances[name_a] = []
                 distance = two_point_distance(player_a.cur_state, blob.pos)
-                self.player_to_blob_distances[name_a].append((blob.id, blob.pos, distance, blob.points))
+                self.player_to_blob_distances[name_a].append((
+                    blob.id, blob.pos, distance, blob.points))
 
     def get_other_players(self, player_name):
         return sorted(list(self.player_distances[player_name]), key=lambda p: p[2])
@@ -114,6 +116,18 @@ class World():
                         player.cur_state = rand.randrange(DISPLAY_WIDTH), \
                             rand.randrange(DISPLAY_HEIGHT)
                         player.radius = 10
+                    else:
+                        # tie breaker needed, randomly pick one to eat since same size
+                        if rand.random() > .49:
+                            player.increase_size(player2.radius / 5)
+                            player2.cur_state = rand.randrange(DISPLAY_WIDTH), \
+                                rand.randrange(DISPLAY_HEIGHT)
+                            player2.radius = 10
+                        else:
+                            player2.increase_size(player.radius / 5)
+                            player.cur_state = rand.randrange(DISPLAY_WIDTH), \
+                                rand.randrange(DISPLAY_HEIGHT)
+                            player.radius = 10
 
     def get_top_players(self):
         top_players = sorted(self.players, key=lambda player: player.radius, reverse=True)[:3]

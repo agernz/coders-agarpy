@@ -56,9 +56,13 @@ class Player():
         return other_direction[0] * -1, other_direction[1] * -1
 
     def increase_size(self, delta):
+        max_radius = 100
         self.radius += delta
-        self.update_rect()
-        self.velocity = round(self.speed - self.radius / 75.)
+        if self.radius < max_radius:
+            self.update_rect()
+            self.velocity = round(self.speed - self.radius / 75.)
+        else:
+            self.radius = max_radius
 
     def interpolate(self, alpha):
         a = tuple(x * alpha for x in self.cur_state)
