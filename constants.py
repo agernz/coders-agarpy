@@ -14,7 +14,7 @@ PLAYER_COLORS = {
     'MINT': (112, 193, 179),
     'ORANGE': (235, 94, 40),
     'GREEN': (63, 163, 77),
-    'SALMON': (255, 166, 193)
+    'PINK': (255, 166, 193)
 }
 BACKGROUND_COLOR = (255, 236, 209)
 TEXT_COLOR = (0, 0, 0)
