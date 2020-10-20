@@ -24,6 +24,9 @@ class Player():
         self.name_text = font.render(name, True, TEXT_COLOR)
         self.rect = None
         self.update_rect()
+        self.nearest_player = None
+        self.nearest_food = None
+        self.danger_player = None
         if decision is not None:
             self.make_decision = decision
             self.isBot = False
@@ -36,7 +39,7 @@ class Player():
         return other_player[2]
 
     def get_blob_distance(self, blob):
-        return blob[1]
+        return blob[2]
 
     def get_player_size(self, other_player):
         return other_player[3]
@@ -52,48 +55,10 @@ class Player():
         other_direction = self.get_direction(other_player)
         return other_direction[0] * -1, other_direction[1] * -1
 
-    def make_decision(self, world):
-        direction = [0, 0]
-        players = world.get_other_players(self.name)
-        closest = players[0]
-        distance = self.get_player_distance(closest)
-        if distance < 100:
-            if self.radius > self.get_player_size(closest):
-                direction = self.get_direction(closest)
-            elif self.radius < self.get_player_distance(closest):
-                direction = self.get_opposite_direction(closest)
-            return direction
-        else:
-            blobs = world.get_blobs(self)
-            closest_blob = blobs[0]
-            direction = self.get_direction(closest_blob)
-            return direction
-
-    def get_state(self):
-        return self.cur_state
-
-    def get_name(self):
-        return self.name
-
-
     def increase_size(self, delta):
         self.radius += delta
         self.update_rect()
         self.velocity = round(self.speed - self.radius / 75.)
-
-    def move(self, direction):
-        if direction == 'UP':
-            self.y_dir = 1
-        elif direction == 'DOWN':
-            self.y_dir = -1
-        if direction == 'RIGHT':
-            self.x_dir = 1
-        elif direction == 'LEFT':
-            self.x_dir = -1
-
-    def stop(self):
-        self.x_dir = 0
-        self.y_dir = 0
 
     def interpolate(self, alpha):
         a = tuple(x * alpha for x in self.cur_state)
@@ -101,12 +66,69 @@ class Player():
         inter_state = (a[0] + b[0], a[1] + b[1])
         self.rect.center = inter_state
 
-    def update(self, world):
-        self.prev_state = self.cur_state
-        if not self.isBot:
-            self.x_dir, self.y_dir = self.make_decision(self, world)
+    def is_in_danger(self):
+        if self.danger_player:
+            return self.get_player_distance(self.danger_player)
+        return 0
+
+    def run_away(self):
+        if self.danger_player:
+            self.x_dir, self.y_dir = self.get_opposite_direction(self.danger_player)
+        self.x_dir, self.y_dir = self.get_opposite_direction(self.nearest_player)
+
+    def attack_nearest_player(self):
+        if self.nearest_player:
+            self.x_dir, self.y_dir = self.get_direction(self.nearest_player)
+
+    def eat_food(self):
+        if self.nearest_food:
+            self.x_dir, self.y_dir = self.get_direction(self.nearest_food)
+
+    def get_nearest_player_size(self):
+        if self.nearest_player:
+            return self.get_player_size(self.nearest_player)
+        return 0
+
+    def get_nearest_player_distance(self):
+        if self.nearest_player:
+            return self.get_player_distance(self.nearest_player)
+        return 100
+
+    def get_food_ponts(self):
+        if self.nearest_food:
+            return self.get_blob_distance(self.nearest_food[3])
+        return 0
+
+    def get_food_distance(self):
+        if self.nearest_food:
+            return self.get_blob_distance(self.nearest_food)
+        return 0
+
+    def simple_logic(self):
+        if self.is_in_danger():
+            self.run_away()
+        elif self.get_nearest_player_distance() < self.get_food_distance():
+            self.attack_nearest_player()
         else:
-            self.x_dir, self.y_dir = self.make_decision(world)
+            self.eat_food()
+
+    def update(self, world):
+        self.danger_player = None
+        other_players = world.get_other_players(self.name)
+        for op in other_players:
+            if self.get_player_distance(op) - self.get_player_size(op) <= 100 \
+                and self.get_player_size(op) > self.radius:
+                self.danger_player = op
+                break
+
+        self.nearest_player = other_players[0]
+        self.nearest_food = world.get_blobs(self)[0]
+
+        self.prev_state = self.cur_state
+        if self.isBot:
+            self.simple_logic()
+        else:
+            self.make_decision(self)
 
         font = pg.font.SysFont('chalkduster.ttf', 20)
         self.name_text = font.render(self.name, True, TEXT_COLOR)
