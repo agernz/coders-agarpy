@@ -2,11 +2,9 @@ import math
 import random as rand
 from blob import Blob
 from player import Player
-from constants import DISPLAY_WIDTH, DISPLAY_HEIGHT, ENV
 from utils import two_point_distance
 from playerloader import get_blobs
-from random import randrange
-from constants import PLAYER_COLORS
+from constants import DISPLAY_WIDTH, DISPLAY_HEIGHT, PLAYER_COLORS
 
 
 # def random_dec(*paras):
@@ -28,10 +26,9 @@ class World():
         #                                player,
         #                                player_blobs[player]))
         colors = list(PLAYER_COLORS.values())
-        self.players.append(Player(rand.randrange(DISPLAY_WIDTH), rand.randrange(DISPLAY_HEIGHT), rand.choice(colors), "Adam"))
-        self.players.append(Player(rand.randrange(DISPLAY_WIDTH), rand.randrange(DISPLAY_HEIGHT), rand.choice(colors), "Pablo"))
-        self.players.append(Player(rand.randrange(DISPLAY_WIDTH), rand.randrange(DISPLAY_HEIGHT), rand.choice(colors), "Gary"))
-        self.players.append(Player(rand.randrange(DISPLAY_WIDTH), rand.randrange(DISPLAY_HEIGHT), rand.choice(colors), "David"))
+        for i in range(4):
+            self.players.append(Player(rand.randrange(DISPLAY_WIDTH),
+                rand.randrange(DISPLAY_HEIGHT), rand.choice(colors), "Player" + str(i)))
         self.blobs = []
         self.add_blobs(50)
 
@@ -44,10 +41,10 @@ class World():
     def calculate_player_distances(self):
         for player_a in self.players:
             for player_b in self.players:
-                name_a = player_a.get_name()
-                name_b = player_b.get_name()
+                name_a = player_a.name
+                name_b = player_b.name
                 if name_a != name_b:
-                    distance = two_point_distance(player_a.get_state(), player_b.get_state())
+                    distance = two_point_distance(player_a.cur_state, player_b.cur_state)
                     if name_a not in self.player_distances:
                         self.player_distances[name_a] = []
                     self.player_distances[name_a].append((player_b.name, player_b.cur_state, distance, player_b.radius))
@@ -55,17 +52,17 @@ class World():
     def calculate_player_blob_distances(self):
         for player_a in self.players:
             for blob in self.blobs:
-                name_a = player_a.get_name()
+                name_a = player_a.name
                 if name_a not in self.player_to_blob_distances:
                     self.player_to_blob_distances[name_a] = []
-                distance = two_point_distance(player_a.get_state(), blob.pos)
-                self.player_to_blob_distances[name_a].append((blob.id, blob.pos, distance))
+                distance = two_point_distance(player_a.cur_state, blob.pos)
+                self.player_to_blob_distances[name_a].append((blob.id, blob.pos, distance, blob.points))
 
     def get_other_players(self, player_name):
         return sorted(list(self.player_distances[player_name]), key=lambda p: p[2])
 
     def get_blobs(self, player):
-        return sorted(list(self.player_to_blob_distances[player.name]), key=lambda p: p[1])
+        return sorted(list(self.player_to_blob_distances[player.name]), key=lambda p: p[2])
 
     def get_locations(self):
         for player in self.players:
@@ -87,18 +84,13 @@ class World():
         for player in self.players:
             player.interpolate(alpha)
 
-    cycle = 0
-
     def update(self):
-        # if self.cycle == 0:
-        #     cycle = 10
         self.locations.clear()
         self.player_distances.clear()
         self.player_to_blob_distances.clear()
         self.calculate_player_distances()
         self.calculate_player_blob_distances()
         self.get_locations()
-        # self.cycle -= 1
         if len(self.blobs) < 50:
             self.add_blobs(50 - len(self.blobs))
         for player in self.players:
@@ -109,6 +101,8 @@ class World():
                 player.increase_size(blob.points)
                 self.blobs.remove(blob)
             for player2 in self.players:
+                if player == player2:
+                    continue
                 if self.is_collided(player, player2):
                     if player.radius > player2.radius:
                         player.increase_size(player2.radius / 5)
