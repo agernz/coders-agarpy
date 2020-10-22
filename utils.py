@@ -1,7 +1,9 @@
 from constants import pg, ENV
-
+import math
 
 controls = [0, 0, 0, 0]
+
+
 def process_input(player):
     global controls
     for event in pg.event.get():
@@ -34,3 +36,8 @@ def process_input(player):
         if not controls[2] & controls[3]:
             player.y_dir = controls[2] or controls[3]
     return True
+
+
+def two_point_distance(point1, point2):
+    # return round(math.sqrt((point2[0] - point1[0]) ** 2 + (point2[1] - point1[1]) ** 2),2)
+    return math.sqrt((point2[0] - point1[0]) ** 2 + (point2[1] - point1[1]) ** 2)
