@@ -1,14 +1,13 @@
+import os
 import dill
-import os
-import re
 
-import os
 
 def get_blobs():
     blobs = {}
     relevant_path = "./player-blobs/"
     included_extensions = ['blob']
-    file_names = [fn for fn in os.listdir(relevant_path) if any(fn.endswith(ext) for ext in included_extensions)]
+    file_names = [fn for fn in os.listdir(relevant_path)
+                  if any(fn.endswith(ext) for ext in included_extensions)]
     for f in file_names:
         blob_name = f.split(".")[0]
         try:

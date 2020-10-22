@@ -1,12 +1,11 @@
-from flask import Flask, request
 import dill
-from player import Player
+from flask import Flask, request
 
 app = Flask(__name__)
 
 
 @app.route('/registerFunction', methods=['POST'])
-def registerPlayer():
+def register_player():
     payload = request.data
     player = None
     try:

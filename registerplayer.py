@@ -1,26 +1,21 @@
-import dill as pickle
 import requests
-import sys
-from player import Player
-import inspect
+import dill as pickle
+from updatePlayer import update_player
 
-def getDecisionFunction(module):
-    return list(filter(lambda x: x[0] is "make_decision", inspect.getmembers(module)))[0]
 
-def registerPlayer(name, f):
+def register_player(name, func):
     url = "http://pabloeckardt.com:3000/registerFunction"
     payload = "data"
     headers = {
         'player': name,
         'Content-Type': 'text/plain'
     }
-    payload = pickle.dumps(f)
+    payload = pickle.dumps(func)
     response = requests.request("POST", url, headers=headers, data=payload)
     print(response.text.encode('utf8'))
 
 ########  Type the name of your blob here ###########
-player_name = "bob"
+PLAYER_NAME = "bob"
 ####################################################
 
-function = getDecisionFunction(Player)[1]
-registerPlayer(player_name, function)
+register_player(PLAYER_NAME, update_player)

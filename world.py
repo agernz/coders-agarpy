@@ -18,17 +18,19 @@ class World():
 
     def __init__(self):
         self.players = []
-        # player_blobs = get_blobs()
-        # for player in player_blobs:
-        #     self.players.append(Player(rand.randrange(DISPLAY_WIDTH),
-        #                                rand.randrange(DISPLAY_HEIGHT),
-        #                                (255, 0, 0),
-        #                                player,
-        #                                player_blobs[player]))
+        player_blobs = get_blobs()
         colors = list(PLAYER_COLORS.values())
+        for player_name in player_blobs:
+            self.players.append(Player(rand.randrange(DISPLAY_WIDTH),
+                                       rand.randrange(DISPLAY_HEIGHT),
+                                       rand.choice(colors),
+                                       player_name,
+                                       player_blobs[player_name]))
         for i in range(4):
             self.players.append(Player(rand.randrange(DISPLAY_WIDTH),
-                rand.randrange(DISPLAY_HEIGHT), rand.choice(colors), "Player" + str(i)))
+                                       rand.randrange(DISPLAY_HEIGHT),
+                                       rand.choice(colors),
+                                       "Player" + str(i)))
         self.blobs = []
         self.add_blobs(50)
 
