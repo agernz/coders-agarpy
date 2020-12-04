@@ -1,8 +1,6 @@
-import time
-from random import randrange
 from math import sqrt
-from constants import pg, DISPLAY_WIDTH, DISPLAY_HEIGHT, TEXT_COLOR
 from pygame import gfxdraw
+from constants import pg, DISPLAY_WIDTH, DISPLAY_HEIGHT, TEXT_COLOR
 
 
 class Player():
@@ -13,7 +11,8 @@ class Player():
         self.cur_state = (init_x, init_y)
         self.prev_state = self.cur_state
         self.color = color
-        self.radius = 10
+        self.radius = 5
+        self.score = 0
         self.x_dir = 0
         self.y_dir = 0
         self.speed = 5
@@ -56,11 +55,12 @@ class Player():
         return other_direction[0] * -1, other_direction[1] * -1
 
     def increase_size(self, delta):
-        max_radius = 100
+        max_radius = 70
         self.radius += delta
+        self.score += round(delta)
         if self.radius < max_radius:
             self.update_rect()
-            self.velocity = round(self.speed - self.radius / 75.)
+            self.velocity = min(5, round(max_radius / self.radius))
         else:
             self.radius = max_radius
 
@@ -107,6 +107,9 @@ class Player():
         if self.nearest_food:
             return self.get_blob_distance(self.nearest_food)
         return 0
+
+    def decrease_score(self):
+        self.score = round(max(0, self.score - self.radius / 2.))
 
     def simple_logic(self):
         if self.is_in_danger():
