@@ -3,12 +3,8 @@ import random as rand
 from blob import Blob
 from player import Player
 from utils import two_point_distance
-from playerloader import get_blobs
+from updatePlayer import PLAYER_NAME, update_player
 from constants import DISPLAY_WIDTH, DISPLAY_HEIGHT, PLAYER_COLORS
-
-
-# def random_dec(*paras):
-#     return randrange(-1, 2), randrange(-1, 2)
 
 
 class World():
@@ -18,19 +14,19 @@ class World():
 
     def __init__(self):
         self.players = []
-        player_blobs = get_blobs()
         colors = list(PLAYER_COLORS.values())
-        for player_name in player_blobs:
+        human = Player(rand.randrange(DISPLAY_WIDTH),
+                       rand.randrange(DISPLAY_HEIGHT),
+                       colors[0],
+                       PLAYER_NAME,
+                       decision=update_player)
+        self.players.append(human)
+        # just populate 1 bot
+        for i in range(1,2):
             self.players.append(Player(rand.randrange(DISPLAY_WIDTH),
                                        rand.randrange(DISPLAY_HEIGHT),
-                                       rand.choice(colors),
-                                       player_name,
-                                       player_blobs[player_name]))
-        for i in range(4):
-            self.players.append(Player(rand.randrange(DISPLAY_WIDTH),
-                                       rand.randrange(DISPLAY_HEIGHT),
-                                       rand.choice(colors),
-                                       "Player" + str(i)))
+                                       rand.choice(colors[1:]),
+                                       "BOT"))
         self.blobs = []
         self.add_blobs(50)
 
@@ -113,27 +109,25 @@ class World():
                         player2.cur_state = rand.randrange(DISPLAY_WIDTH), \
                             rand.randrange(DISPLAY_HEIGHT)
                         player2.radius = 10
-                    elif player2.radius < player.radius:
-                        player2.increase_size(player.radius / 5)
-                        player.cur_state = rand.randrange(DISPLAY_WIDTH), \
-                            rand.randrange(DISPLAY_HEIGHT)
-                        player.radius = 10
+                        player2.decrease_score()
                     else:
                         # tie breaker needed, randomly pick one to eat since same size
                         if rand.random() > .49:
                             player.increase_size(player2.radius / 5)
                             player2.cur_state = rand.randrange(DISPLAY_WIDTH), \
                                 rand.randrange(DISPLAY_HEIGHT)
+                            player2.decrease_score()
                             player2.radius = 10
                         else:
                             player2.increase_size(player.radius / 5)
                             player.cur_state = rand.randrange(DISPLAY_WIDTH), \
                                 rand.randrange(DISPLAY_HEIGHT)
+                            player.decrease_score()
                             player.radius = 10
 
     def get_top_players(self):
-        top_players = sorted(self.players, key=lambda player: player.radius, reverse=True)[:3]
-        return (top_player.name for top_player in top_players)
+        top_players = sorted(self.players, key=lambda player: player.score, reverse=True)[:3]
+        return (top_player for top_player in top_players)
 
     def draw(self, draw_sprites):
         draw_sprites(self.players)
