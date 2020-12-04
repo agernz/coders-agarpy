@@ -6,9 +6,9 @@ from pygame import gfxdraw
 FILL_COLOR = (181, 101, 118)
 OUTLINE_COLOR = (94, 100, 114)
 BLOB_TIERS = {
-    1: (9, 5),
-    2: (6, 4),
-    3: (3, 3)
+    1: (3, 5),
+    2: (2, 4),
+    3: (1, 3)
 }
 
 
