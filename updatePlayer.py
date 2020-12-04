@@ -19,6 +19,8 @@ Docs:
         - get_food_distance -> returns the distance to the nearest food blob
 """
 
+PLAYER_NAME = "Player"
+
 def update_player(player):
     if player.is_in_danger():
         player.run_away()
