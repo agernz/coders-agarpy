@@ -59,16 +59,28 @@ while running:
         running = False
 
 top_players = world.get_top_players()
-first_font = pg.font.SysFont('chalkduster.ttf', 150)
-contenders_font = pg.font.SysFont('chalkduster.ttf', 50)
-first_text = first_font.render("{} Wins!".format(next(top_players)), True, TEXT_COLOR)
-second_text = contenders_font.render("2nd Place: {}".format(next(top_players)), True, TEXT_COLOR)
-third_text = contenders_font.render("3rd Place: {}".format(next(top_players)), True, TEXT_COLOR)
+first_font = pg.font.SysFont('chalkduster.ttf', 80)
+contenders_font = pg.font.SysFont('chalkduster.ttf', 30)
+fp = next(top_players)
+sp = next(top_players)
+tp = None
+try:
+    tp = next(top_players)
+except:
+    pass
+first_text = first_font.render("{} Wins! - score: {}".format(fp.name, fp.score),
+                               True, TEXT_COLOR)
+second_text = contenders_font.render("2nd Place: {} - score: {}".format(sp.name, sp.score),
+                                     True, TEXT_COLOR)
+if tp:
+    third_text = contenders_font.render("3rd Place: {} - score: {}".format(tp.name, tp.score),
+                                        True, TEXT_COLOR)
 text_y = DISPLAY_HEIGHT / 2 - first_text.get_height()
 DISPLAY.blit(first_text, (DISPLAY_WIDTH / 2 - first_text.get_width() / 2, text_y))
-DISPLAY.blit(second_text, (DISPLAY_WIDTH / 2 - second_text.get_width() / 2, text_y + 200))
-DISPLAY.blit(third_text, (DISPLAY_WIDTH / 2 - third_text.get_width() / 2, text_y + 250))
+DISPLAY.blit(second_text, (DISPLAY_WIDTH / 2 - second_text.get_width() / 2, text_y + 100))
+if tp:
+    DISPLAY.blit(third_text, (DISPLAY_WIDTH / 2 - third_text.get_width() / 2, text_y + 150))
 pg.display.update()
-sleep(10)
+sleep(5)
 
 pg.quit()
