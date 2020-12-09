@@ -1,14 +1,10 @@
 import math
 import random as rand
+from time import time
 from blob import Blob
 from player import Player
-from utils import two_point_distance
-from playerloader import get_blobs
-from constants import DISPLAY_WIDTH, DISPLAY_HEIGHT, PLAYER_COLORS
-
-
-# def random_dec(*paras):
-#     return randrange(-1, 2), randrange(-1, 2)
+from updatePlayer import PLAYER_NAME, update_player
+from constants import DISPLAY_WIDTH, DISPLAY_HEIGHT
 
 
 class World():
@@ -17,22 +13,23 @@ class World():
     locations = {}
 
     def __init__(self):
+        self.end_time = time() + 60
+        self.max_food = 30
         self.players = []
-        player_blobs = get_blobs()
-        colors = list(PLAYER_COLORS.values())
-        for player_name in player_blobs:
+        human = Player(rand.randrange(DISPLAY_WIDTH),
+                       rand.randrange(DISPLAY_HEIGHT),
+                       PLAYER_NAME,
+                       decision=update_player)
+        self.players.append(human)
+        for i in range(1, 2):
             self.players.append(Player(rand.randrange(DISPLAY_WIDTH),
                                        rand.randrange(DISPLAY_HEIGHT),
-                                       rand.choice(colors),
-                                       player_name,
-                                       player_blobs[player_name]))
-        for i in range(4):
-            self.players.append(Player(rand.randrange(DISPLAY_WIDTH),
-                                       rand.randrange(DISPLAY_HEIGHT),
-                                       rand.choice(colors),
-                                       "Player" + str(i)))
+                                       'BOT'))
         self.blobs = []
-        self.add_blobs(50)
+        self.add_blobs(self.max_food)
+
+    def get_distance(self, point1, point2):
+        return math.sqrt((point2[0] - point1[0]) ** 2 + (point2[1] - point1[1]) ** 2)
 
     def add_blobs(self, n):
         for i in range(n):
@@ -46,7 +43,7 @@ class World():
                 name_a = player_a.name
                 name_b = player_b.name
                 if name_a != name_b:
-                    distance = two_point_distance(player_a.cur_state, player_b.cur_state)
+                    distance = self.get_distance(player_a.cur_state, player_b.cur_state)
                     if name_a not in self.player_distances:
                         self.player_distances[name_a] = []
                     self.player_distances[name_a].append((
@@ -58,7 +55,7 @@ class World():
                 name_a = player_a.name
                 if name_a not in self.player_to_blob_distances:
                     self.player_to_blob_distances[name_a] = []
-                distance = two_point_distance(player_a.cur_state, blob.pos)
+                distance = self.get_distance(player_a.cur_state, blob.pos)
                 self.player_to_blob_distances[name_a].append((
                     blob.id, blob.pos, distance, blob.points))
 
@@ -84,22 +81,25 @@ class World():
         obj2_y = obj2.rect.center[1]
         return math.sqrt((obj1_x - obj2_x) ** 2 + (obj1_y - obj2_y) ** 2) <= obj1.radius
 
-    def interpolate(self, alpha):
-        for player in self.players:
-            player.interpolate(alpha)
-
     def update(self):
+        game_state = {'running': True}
+        if time() > self.end_time:
+            game_state['running'] = False
+            game_state['top_players'] = list(self.get_top_players())
+            return game_state
+
         self.locations.clear()
         self.player_distances.clear()
         self.player_to_blob_distances.clear()
         self.calculate_player_distances()
         self.calculate_player_blob_distances()
         self.get_locations()
-        if len(self.blobs) < 50:
-            self.add_blobs(50 - len(self.blobs))
+        if len(self.blobs) < self.max_food:
+            self.add_blobs(self.max_food - len(self.blobs))
         for player in self.players:
             player.update(self)
 
+        player_states = []
         for player in self.players:
             for blob in [blob for blob in self.blobs if self.is_collided(player, blob)]:
                 player.increase_size(blob.points)
@@ -113,28 +113,27 @@ class World():
                         player2.cur_state = rand.randrange(DISPLAY_WIDTH), \
                             rand.randrange(DISPLAY_HEIGHT)
                         player2.radius = 10
-                    elif player2.radius < player.radius:
-                        player2.increase_size(player.radius / 5)
-                        player.cur_state = rand.randrange(DISPLAY_WIDTH), \
-                            rand.randrange(DISPLAY_HEIGHT)
-                        player.radius = 10
+                        player2.decrease_score()
                     else:
                         # tie breaker needed, randomly pick one to eat since same size
                         if rand.random() > .49:
                             player.increase_size(player2.radius / 5)
                             player2.cur_state = rand.randrange(DISPLAY_WIDTH), \
                                 rand.randrange(DISPLAY_HEIGHT)
+                            player2.decrease_score()
                             player2.radius = 10
                         else:
                             player2.increase_size(player.radius / 5)
                             player.cur_state = rand.randrange(DISPLAY_WIDTH), \
                                 rand.randrange(DISPLAY_HEIGHT)
+                            player.decrease_score()
                             player.radius = 10
+            player_states.append((player.cur_state[0], player.cur_state[1],
+                                  player.radius, player.name))
+        game_state['player_data'] = player_states
+        game_state['food_data'] = [(food.pos[0], food.pos[1], food.radius) for food in self.blobs]
+        return game_state
 
     def get_top_players(self):
-        top_players = sorted(self.players, key=lambda player: player.radius, reverse=True)[:3]
-        return (top_player.name for top_player in top_players)
-
-    def draw(self, draw_sprites):
-        draw_sprites(self.players)
-        draw_sprites(self.blobs)
+        top_players = sorted(self.players, key=lambda player: player.score, reverse=True)[:3]
+        return [(tp.name, tp.score) for tp in top_players]
