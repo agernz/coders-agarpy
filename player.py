@@ -1,27 +1,20 @@
-import time
-from random import randrange
 from math import sqrt
-from constants import pg, DISPLAY_WIDTH, DISPLAY_HEIGHT, TEXT_COLOR
-from pygame import gfxdraw
+from constants import pg, DISPLAY_WIDTH, DISPLAY_HEIGHT
 
 
 class Player():
-    dec_counter = 0
-
-    def __init__(self, init_x, init_y, color, name, decision=None):
+    def __init__(self, init_x, init_y, name, decision=None):
         self.name = name
         self.cur_state = (init_x, init_y)
         self.prev_state = self.cur_state
-        self.color = color
-        self.radius = 10
+        self.radius = 5
+        self.score = 0
         self.x_dir = 0
         self.y_dir = 0
         self.speed = 5
         self.velocity = self.speed
         self.image = None
-        self.isBot = True
-        font = pg.font.SysFont('chalkduster.ttf', 20)
-        self.name_text = font.render(name, True, TEXT_COLOR)
+        self.is_bot = True
         self.rect = None
         self.update_rect()
         self.nearest_player = None
@@ -29,7 +22,7 @@ class Player():
         self.danger_player = None
         if decision is not None:
             self.make_decision = decision
-            self.isBot = False
+            self.is_bot = False
 
     def update_rect(self):
         self.rect = pg.Rect(self.cur_state[0] - self.radius, self.cur_state[1] - self.radius, \
@@ -56,19 +49,14 @@ class Player():
         return other_direction[0] * -1, other_direction[1] * -1
 
     def increase_size(self, delta):
-        max_radius = 100
+        max_radius = 70
         self.radius += delta
+        self.score += round(delta)
         if self.radius < max_radius:
             self.update_rect()
-            self.velocity = round(self.speed - self.radius / 75.)
+            self.velocity = min(5, round(max_radius / self.radius))
         else:
             self.radius = max_radius
-
-    def interpolate(self, alpha):
-        a = tuple(x * alpha for x in self.cur_state)
-        b = tuple(x * (1.0 - alpha) for x in self.prev_state)
-        inter_state = (a[0] + b[0], a[1] + b[1])
-        self.rect.center = inter_state
 
     def is_in_danger(self):
         if self.danger_player:
@@ -108,13 +96,11 @@ class Player():
             return self.get_blob_distance(self.nearest_food)
         return 0
 
+    def decrease_score(self):
+        self.score = round(max(0, self.score - self.radius / 2.))
+
     def simple_logic(self):
-        if self.is_in_danger():
-            self.run_away()
-        elif self.get_nearest_player_distance() < self.get_food_distance():
-            self.attack_nearest_player()
-        else:
-            self.eat_food()
+        self.eat_food()
 
     def update(self, world):
         self.danger_player = None
@@ -129,13 +115,10 @@ class Player():
         self.nearest_food = world.get_blobs(self)[0]
 
         self.prev_state = self.cur_state
-        if self.isBot:
+        if self.is_bot:
             self.simple_logic()
         else:
             self.make_decision(self)
-
-        font = pg.font.SysFont('chalkduster.ttf', 20)
-        self.name_text = font.render(self.name, True, TEXT_COLOR)
 
         self.cur_state = (self.cur_state[0] + self.x_dir * self.velocity, \
                           self.cur_state[1] + self.y_dir * self.velocity)
@@ -145,16 +128,16 @@ class Player():
             self.cur_state = (self.prev_state[0], self.cur_state[1])
         self.rect.center = self.cur_state
 
-    def draw(self, target_surface):
-        pos = tuple([int(x) for x in self.cur_state])
-        radius = int(self.radius)
-        gfxdraw.filled_circle(target_surface, pos[0], pos[1], radius, self.color)
-        gfxdraw.aacircle(target_surface, pos[0], pos[1], radius, self.color)
+    # def draw(self, target_surface):
+    #     pos = tuple([int(x) for x in self.cur_state])
+    #     radius = int(self.radius)
+    #     gfxdraw.filled_circle(target_surface, pos[0], pos[1], radius, self.color)
+    #     gfxdraw.aacircle(target_surface, pos[0], pos[1], radius, self.color)
 
-        # draw a circle to represent the line of sight of the blob
-        pg.draw.circle(target_surface, (255, 255, 255), pos, radius + 100, 1)
-        text_pos = (
-            self.cur_state[0] - self.name_text.get_width() / 2,
-            self.cur_state[1] - self.name_text.get_height() / 2
-        )
-        target_surface.blit(self.name_text, text_pos)
+    #     # draw a circle to represent the line of sight of the blob
+    #     pg.draw.circle(target_surface, (255, 255, 255), pos, radius + 100, 1)
+    #     text_pos = (
+    #         self.cur_state[0] - self.name_text.get_width() / 2,
+    #         self.cur_state[1] - self.name_text.get_height() / 2
+    #     )
+    #     target_surface.blit(self.name_text, text_pos)
