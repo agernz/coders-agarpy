@@ -1,6 +1,7 @@
 from math import sqrt
 from constants import pg, DISPLAY_WIDTH, DISPLAY_HEIGHT
 
+#TODO bug when player is running away but is not close to other player
 
 class Player():
     def __init__(self, init_x, init_y, name, decision=None):

@@ -20,6 +20,7 @@ function drawGame(data) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   // add end game scenario
   if (!data.running) {
+    clearInterval(game_interval);
     return;
   }
   data.player_data.forEach(player => {
@@ -34,4 +35,4 @@ function getGameState() {
     $.get('/updateGame', drawGame)
 }
 
-setInterval(getGameState, 100);
+var game_interval = setInterval(getGameState, 100);
