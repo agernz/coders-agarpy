@@ -91,10 +91,6 @@ function drawGame(data) {
     drawTimer(data['timer']);
 }
 
-function getGameState() {
-    $.get('/updateGame', drawGame);
-}
-
 var socket = io();
 socket.on('connect', function() {
     socket.emit('connected', {data: 'Socket connection established!'});
