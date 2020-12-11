@@ -1,8 +1,6 @@
 from math import sqrt
-from constants import pg, DISPLAY_WIDTH, DISPLAY_HEIGHT
+from constants import DISPLAY_WIDTH, DISPLAY_HEIGHT
 
-
-# TODO bug when player is running away but is not close to other player
 
 class Player():
     def __init__(self, init_x, init_y, name, color, decision=None):
@@ -14,22 +12,16 @@ class Player():
         self.score = 0
         self.x_dir = 0
         self.y_dir = 0
-        self.speed = 5
+        self.speed = 4
         self.velocity = self.speed
         self.image = None
         self.is_bot = True
-        self.rect = None
-        self.update_rect()
         self.nearest_player = None
         self.nearest_food = None
         self.danger_player = None
         if decision is not None:
             self.make_decision = decision
             self.is_bot = False
-
-    def update_rect(self):
-        self.rect = pg.Rect(self.cur_state[0] - self.radius, self.cur_state[1] - self.radius, \
-                            self.radius * 2, self.radius * 2)
 
     def get_player_distance(self, other_player):
         return other_player[2]
@@ -56,8 +48,7 @@ class Player():
         self.radius += delta
         self.score += round(delta)
         if self.radius < max_radius:
-            self.update_rect()
-            self.velocity = min(5, round(max_radius / self.radius))
+            self.velocity = min(4, max(2, round(max_radius / self.radius)))
         else:
             self.radius = max_radius
 
@@ -129,18 +120,3 @@ class Player():
             self.cur_state = (self.cur_state[0], self.prev_state[1])
         if self.cur_state[0] < 0 or self.cur_state[0] > DISPLAY_WIDTH:
             self.cur_state = (self.prev_state[0], self.cur_state[1])
-        self.rect.center = self.cur_state
-
-    # def draw(self, target_surface):
-    #     pos = tuple([int(x) for x in self.cur_state])
-    #     radius = int(self.radius)
-    #     gfxdraw.filled_circle(target_surface, pos[0], pos[1], radius, self.color)
-    #     gfxdraw.aacircle(target_surface, pos[0], pos[1], radius, self.color)
-
-    #     # draw a circle to represent the line of sight of the blob
-    #     pg.draw.circle(target_surface, (255, 255, 255), pos, radius + 100, 1)
-    #     text_pos = (
-    #         self.cur_state[0] - self.name_text.get_width() / 2,
-    #         self.cur_state[1] - self.name_text.get_height() / 2
-    #     )
-    #     target_surface.blit(self.name_text, text_pos)
