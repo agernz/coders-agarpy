@@ -1,4 +1,3 @@
-from time import sleep
 from world import World
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
@@ -19,9 +18,6 @@ def on_connected(json):
     print('Connected to client: ' + str(json))
     while True:
         emit('update_game', world.update())
-        sleep(.1)
-        if not world.running:
-            break
 
 @socketio.on('restart')
 def restart(json):

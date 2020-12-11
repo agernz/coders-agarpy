@@ -1,8 +1,8 @@
 import math
 import random as rand
-from time import time
 from blob import Blob
 from player import Player
+from time import time, sleep
 from updatePlayer import PLAYER_NAME, update_player
 from constants import DISPLAY_WIDTH, DISPLAY_HEIGHT
 
@@ -112,6 +112,7 @@ class World():
         return math.sqrt((obj1_x - obj2_x) ** 2 + (obj1_y - obj2_y) ** 2) <= obj1.radius
 
     def update(self):
+        sleep(.1)
         game_state = {'running': True}
         if time() > self.end_time:
             self.running = False
