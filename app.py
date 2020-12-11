@@ -20,6 +20,13 @@ def on_connected(json):
     while True:
         emit('update_game', world.update())
         sleep(.1)
+        if not world.running:
+            break
+
+@socketio.on('restart')
+def restart(json):
+    print('restart')
+    world.restart()
 
 @socketio.on('disconnect')
 def disconnected():
