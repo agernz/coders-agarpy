@@ -8,18 +8,22 @@ var CANVAS_HEIGHT = 500;
 var PLAYABLE_DISPLAY_WIDTH = 640;
 var PLAYABLE_DISPLAY_HEIGHT = 320;
 
+function onStartButton() {
+  socket.emit('restart', {});
+}
+
 function drawCircle(x, y, radius, color) {
     ctx.beginPath();
     ctx.arc(x, y, radius, 0, endRad);
-    ctx.fillStyle = ctx.fillStyle = color;
+    ctx.fillStyle = color;
     ctx.fill();
     ctx.closePath();
 }
 
 function drawVisionCircle(x, y, color) {
     ctx.beginPath();
-    ctx.strokeStyle = '#' + color;
-    ctx.arc(x, y, 100, 0, 2 * Math.PI);
+    ctx.strokeStyle = color;
+    ctx.arc(x, y, 100, 0, endRad);
     ctx.stroke();
     ctx.closePath()
 }
@@ -38,7 +42,6 @@ function drawBoard() {
     ctx.stroke();
 }
 
-
 function drawScoreBoard() {
     ctx.beginPath();
     ctx.fillStyle = 'white';
@@ -51,9 +54,9 @@ function drawTimer(time) {
     ctx.fillText(time + ' seconds left', 220, 360);
 }
 
-function drawPlayer(x, y, radius, name, color) {
-    drawCircle(x, y, radius, '#' + color)
-    // add sight circle
+function drawPlayer(x, y, radius, color) {
+    drawCircle(x, y, radius, color);
+    drawVisionCircle(x, y, color);
 }
 
 function drawScore(score, name, index) {
@@ -66,44 +69,30 @@ function drawScore(score, name, index) {
         yOffset + (yIndex * 30));
 }
 
-function sortPlayers(data) {
-    new_data = data.sort((a, b) => {
-        var sortOrder = 0;
-        if (a[2] > b[2]) {
-            sortOrder = 1
-        } else if (a[2] < b[2]) {
-            sortOrder = -1
-        }
-        return sortOrder
-    });
-    return new_data;
-}
-
 function drawGame(data) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // add end game scenario
     if (!data.running) {
-        return;
+      ctx.font = "50px Arial";
+      ctx.fillText(data.top_player + ' Wins!', 200, 260);
+      return;
     }
     drawBoard();
     drawScoreBoard();
-    data.player_data = sortPlayers(data.player_data).reverse()
-    player_count = 0
+    player_count = 0;
     data.player_data.forEach(player => {
-        drawPlayer(player[0], player[1], player[2], player[3], player[4]);
-        drawVisionCircle(player[0], player[1], player[4]);
-        drawScore(player[2], player[3], player_count);
+        var player_color = '#' + player.color;
+        drawPlayer(player.x, player.y, player.radius, player_color);
+        drawScore(player.score, player.name, player_count);
         player_count += 1;
     });
     data.food_data.forEach(food => {
-        drawCircle(food[0], food[1], food[2], 'black')
+        drawCircle(food[0], food[1], food[2], 'black');
     });
     drawTimer(data['timer']);
-
 }
 
 function getGameState() {
-    $.get('/updateGame', drawGame)
+    $.get('/updateGame', drawGame);
 }
 
 var socket = io();
