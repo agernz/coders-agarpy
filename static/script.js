@@ -20,7 +20,6 @@ function drawGame(data) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   // add end game scenario
   if (!data.running) {
-    clearInterval(game_interval);
     return;
   }
   data.player_data.forEach(player => {
@@ -35,4 +34,9 @@ function getGameState() {
     $.get('/updateGame', drawGame)
 }
 
-var game_interval = setInterval(getGameState, 100);
+var socket = io();
+socket.on('connect', function() {
+    socket.emit('connected', {data: 'Socket connection established!'});
+});
+
+socket.on('update_game', drawGame);
