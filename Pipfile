@@ -19,6 +19,9 @@ MarkupSafe = "==1.1.1"
 Werkzeug = "==1.0.1"
 websocket-client = "*"
 websockets = "*"
+eventlet = "*"
+flask-socketio = "*"
+gunicorn = "*"
 
 [dev-packages]
 

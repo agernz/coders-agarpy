@@ -10,7 +10,7 @@ from constants import DISPLAY_WIDTH, DISPLAY_HEIGHT
 def get_random_colors(n):
     colors = []
     for i in range(n):
-        colors.append(str(hex(rand.randint(0, 16777215))))
+        colors.append(str(hex(rand.randint(0, 16777215)))[-6:])
     return colors
 
 
@@ -20,24 +20,45 @@ class World():
     locations = {}
 
     def __init__(self):
-        colors = get_random_colors(11);
-        print(colors)
-        self.end_time = time() + 700
+        colors = get_random_colors(11)
+        self.end_time = time() + 180
         self.max_food = 30
         self.players = []
+        self.top_player_name = None
+        self.running = True
+        self.blobs = []
+        self.add_blobs(self.max_food)
         human = Player(rand.randrange(DISPLAY_WIDTH),
                        rand.randrange(DISPLAY_HEIGHT),
                        PLAYER_NAME,
-                       colors[0][-6:],
+                       colors[0],
                        decision=update_player)
         self.players.append(human)
-        for i in range(1, 10):
+        for i in range(1, 4):
             self.players.append(Player(rand.randrange(DISPLAY_WIDTH),
                                        rand.randrange(DISPLAY_HEIGHT),
                                        'BOT_' + str(i),
-                                       colors[i][-6:]))
-            self.blobs = []
-            self.add_blobs(self.max_food)
+                                       colors[i]))
+
+    def restart(self):
+        colors = get_random_colors(11)
+        self.running = True
+        self.end_time = time() + 180
+        self.players = []
+        self.top_player_name = None
+        self.blobs = []
+        self.add_blobs(self.max_food)
+        human = Player(rand.randrange(DISPLAY_WIDTH),
+                       rand.randrange(DISPLAY_HEIGHT),
+                       PLAYER_NAME,
+                       colors[0],
+                       decision=update_player)
+        self.players.append(human)
+        for i in range(1, 4):
+            self.players.append(Player(rand.randrange(DISPLAY_WIDTH),
+                                       rand.randrange(DISPLAY_HEIGHT),
+                                       'BOT_' + str(i),
+                                       colors[i]))
 
     def get_distance(self, point1, point2):
         return math.sqrt((point2[0] - point1[0]) ** 2 + (point2[1] - point1[1]) ** 2)
@@ -66,9 +87,9 @@ class World():
                 name_a = player_a.name
                 if name_a not in self.player_to_blob_distances:
                     self.player_to_blob_distances[name_a] = []
-                distance = self.get_distance(player_a.cur_state, blob.pos)
+                distance = self.get_distance(player_a.cur_state, blob.cur_state)
                 self.player_to_blob_distances[name_a].append((
-                    blob.id, blob.pos, distance, blob.points))
+                    blob.id, blob.cur_state, distance, blob.points))
 
     def get_other_players(self, player_name):
         return sorted(list(self.player_distances[player_name]), key=lambda p: p[2])
@@ -84,19 +105,18 @@ class World():
         return self.locations[player['name']]
 
     def is_collided(self, obj1, obj2):
-        if obj1.rect is None or obj2.rect is None:
-            return False
-        obj1_x = obj1.rect.center[0]
-        obj1_y = obj1.rect.center[1]
-        obj2_x = obj2.rect.center[0]
-        obj2_y = obj2.rect.center[1]
+        obj1_x = obj1.cur_state[0]
+        obj1_y = obj1.cur_state[1]
+        obj2_x = obj2.cur_state[0]
+        obj2_y = obj2.cur_state[1]
         return math.sqrt((obj1_x - obj2_x) ** 2 + (obj1_y - obj2_y) ** 2) <= obj1.radius
 
     def update(self):
         game_state = {'running': True}
         if time() > self.end_time:
-            game_state['running'] = False
-            game_state['top_players'] = list(self.get_top_players())
+            self.running = False
+            game_state['top_player'] = self.top_player_name
+            game_state['running'] = self.running
             return game_state
 
         self.locations.clear()
@@ -139,13 +159,18 @@ class World():
                                                rand.randrange(DISPLAY_HEIGHT)
                             player.decrease_score()
                             player.radius = 10
-            player_states.append((player.cur_state[0], player.cur_state[1],
-                                  player.radius, player.name, player.color))
-        game_state['player_data'] = player_states
-        game_state['food_data'] = [(food.pos[0], food.pos[1], food.radius) for food in self.blobs]
+            player_states.append({
+                'x': player.cur_state[0],
+                'y': player.cur_state[1],
+                'radius': player.radius,
+                'name': player.name,
+                'color': player.color,
+                'score': player.score
+            })
+        game_state['player_data'] = sorted(player_states,
+                                           key=lambda player: player['score'], reverse=True)
+        self.top_player_name = game_state['player_data'][0]['name']
+        game_state['food_data'] = [(food.cur_state[0], food.cur_state[1], food.radius)
+                                   for food in self.blobs]
         game_state['timer'] = int(self.end_time - time())
         return game_state
-
-    def get_top_players(self):
-        top_players = sorted(self.players, key=lambda player: player.score, reverse=True)[:3]
-        return [(tp.name, tp.score) for tp in top_players]

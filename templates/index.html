@@ -6,11 +6,22 @@
     <style>
     	* { padding: 0; margin: 0; }
     	canvas { background: #eee; display: block; margin: 0 auto; }
+        .top { padding-top: 25px; padding-bottom: 25px; text-align: center; }
+        .start-button { 
+                font-size: 24px;
+                background-color: gray;
+                color: black;
+                border-radius: 8px;
+                padding: 12px 28px;
+            }
     </style>
 </head>
 <body>
-<canvas id="myCanvas" width="640" height="500"></canvas>
-<script src="/static/jquery-3.5.1.min.js"></script>
-<script src="/static/script.js" defer></script>
+    <div class="top">
+        <button class="start-button" type="button" onclick="onStartButton();">Restart</button>
+    </div>
+    <canvas id="myCanvas" width="640" height="500"></canvas>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" integrity="sha256-yr4fRk/GU1ehYJPAs8P4JlTgu0Hdsp4ZKrx8bDEDC3I=" crossorigin="anonymous"></script>
+    <script src="/static/script.js" defer></script>
 </body>
 </html>
