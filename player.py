@@ -1,11 +1,13 @@
 from math import sqrt
 from constants import pg, DISPLAY_WIDTH, DISPLAY_HEIGHT
 
-#TODO bug when player is running away but is not close to other player
+
+# TODO bug when player is running away but is not close to other player
 
 class Player():
-    def __init__(self, init_x, init_y, name, decision=None):
+    def __init__(self, init_x, init_y, name, color, decision=None):
         self.name = name
+        self.color = color
         self.cur_state = (init_x, init_y)
         self.prev_state = self.cur_state
         self.radius = 5
@@ -27,7 +29,7 @@ class Player():
 
     def update_rect(self):
         self.rect = pg.Rect(self.cur_state[0] - self.radius, self.cur_state[1] - self.radius, \
-                                self.radius * 2, self.radius * 2)
+                            self.radius * 2, self.radius * 2)
 
     def get_player_distance(self, other_player):
         return other_player[2]
@@ -108,7 +110,7 @@ class Player():
         other_players = world.get_other_players(self.name)
         for op in other_players:
             if self.get_player_distance(op) - self.get_player_size(op) <= 100 \
-                and self.get_player_size(op) > self.radius:
+                    and self.get_player_size(op) > self.radius:
                 self.danger_player = op
                 break
 

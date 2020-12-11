@@ -12,3 +12,5 @@ def load_game():
 @app.route('/updateGame')
 def update_game():
     return world.update()
+
+app.run(host='0.0.0.0', port=8080)
