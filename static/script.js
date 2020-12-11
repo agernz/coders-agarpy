@@ -1,6 +1,6 @@
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
-var endRad = Math.PI << 1;
+var endRad = Math.PI * 2;
 
 var CANVAS_WIDTH = 640;
 var CANVAS_HEIGHT = 500;

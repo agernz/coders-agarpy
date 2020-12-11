@@ -109,7 +109,8 @@ class World():
         obj1_y = obj1.cur_state[1]
         obj2_x = obj2.cur_state[0]
         obj2_y = obj2.cur_state[1]
-        return math.sqrt((obj1_x - obj2_x) ** 2 + (obj1_y - obj2_y) ** 2) <= obj1.radius
+        return math.sqrt((obj1_x - obj2_x) ** 2 + (obj1_y - obj2_y) ** 2) <=\
+               (obj1.radius + obj2.radius - 4)
 
     def update(self):
         sleep(.1)
