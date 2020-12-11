@@ -62,8 +62,8 @@ function drawPlayer(x, y, radius, color) {
 function drawScore(score, name, index) {
     ctx.font = "16px Arial";
     var yIndex = Math.floor(index / 5);
-    xStartingPoint = 10;
-    yOffset = 400;
+    var xStartingPoint = 10;
+    var yOffset = 400;
     ctx.fillText(name + ' : ' + Math.round(score),
         xStartingPoint + (120 * index) % 600,
         yOffset + (yIndex * 30));
@@ -78,7 +78,7 @@ function drawGame(data) {
     }
     drawBoard();
     drawScoreBoard();
-    player_count = 0;
+    var player_count = 0;
     data.player_data.forEach(player => {
         var player_color = '#' + player.color;
         drawPlayer(player.x, player.y, player.radius, player_color);
