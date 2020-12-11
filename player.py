@@ -12,7 +12,7 @@ class Player():
         self.score = 0
         self.x_dir = 0
         self.y_dir = 0
-        self.speed = 4
+        self.speed = 3
         self.velocity = self.speed
         self.image = None
         self.is_bot = True

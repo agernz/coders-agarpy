@@ -9,7 +9,13 @@ var PLAYABLE_DISPLAY_WIDTH = 640;
 var PLAYABLE_DISPLAY_HEIGHT = 320;
 
 function onStartButton() {
-  socket.emit('restart', {});
+    socket.emit('restart', {});
+}
+
+function drawName(x, y, name) {
+    ctx.fillStyle = 'black';
+    ctx.font = "15px Arial";
+    ctx.fillText(name, x - 15, y);
 }
 
 function drawCircle(x, y, radius, color) {
@@ -49,7 +55,8 @@ function drawScoreBoard() {
     ctx.closePath();
 }
 
-function drawTimer(time) {
+function drawTimer(time, color) {
+    ctx.fillStyle = 'black';
     ctx.font = "30px Arial";
     ctx.fillText(time + ' seconds left', 220, 360);
 }
@@ -59,7 +66,8 @@ function drawPlayer(x, y, radius, color) {
     drawVisionCircle(x, y, color);
 }
 
-function drawScore(score, name, index) {
+function drawScore(score, name, index, color) {
+    ctx.fillStyle = color;
     ctx.font = "16px Arial";
     var yIndex = Math.floor(index / 5);
     var xStartingPoint = 10;
@@ -72,9 +80,9 @@ function drawScore(score, name, index) {
 function drawGame(data) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (!data.running) {
-      ctx.font = "50px Arial";
-      ctx.fillText(data.top_player + ' Wins!', 200, 260);
-      return;
+        ctx.font = "50px Arial";
+        ctx.fillText(data.top_player + ' Wins!', 200, 260);
+        return;
     }
     drawBoard();
     drawScoreBoard();
@@ -82,7 +90,8 @@ function drawGame(data) {
     data.player_data.forEach(player => {
         var player_color = '#' + player.color;
         drawPlayer(player.x, player.y, player.radius, player_color);
-        drawScore(player.score, player.name, player_count);
+        drawScore(player.score, player.name, player_count, player_color);
+        drawName(player.x, player.y, player.name);
         player_count += 1;
     });
     data.food_data.forEach(food => {
@@ -92,7 +101,7 @@ function drawGame(data) {
 }
 
 var socket = io();
-socket.on('connect', function() {
+socket.on('connect', function () {
     socket.emit('connected', {data: 'Socket connection established!'});
 });
 
